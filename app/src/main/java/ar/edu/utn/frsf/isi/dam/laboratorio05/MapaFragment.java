@@ -21,15 +21,13 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     public MapaFragment() { }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup
-            container, Bundle savedInstanceState) {
-        View rootView = super.onCreateView(inflater, container,
-                savedInstanceState);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+
+        View rootView = super.onCreateView(inflater, container, savedInstanceState);
         int tipoMapa =0;
         Bundle argumentos = getArguments();
-        if(argumentos !=null) {
+        if(argumentos !=null)
             tipoMapa = argumentos .getInt("tipo_mapa",0);
-        }
         getMapAsync(this);
         return rootView;
     }
