@@ -23,8 +23,10 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         getSupportFragmentManager().addOnBackStackChangedListener(this);
+
         //Handle when activity is recreated like on orientation Change
         shouldDisplayHomeUp();
+
         drawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
         navView = (NavigationView)findViewById(R.id.navview);
         BienvenidoFragment fragmentInicio = new BienvenidoFragment();
@@ -49,7 +51,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment = new NuevoReclamoFragment();
                                     ((NuevoReclamoFragment) fragment).setListener(MainActivity.this);
                                 }
-
                                 fragmentTransaction = true;
                                 break;
                             case R.id.optListaReclamo:
@@ -60,11 +61,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 break;
                             case R.id.optVerMapa:
                                 //TODO HABILITAR
-                                //tag="mapaReclamos";
-                               // fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-                                //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
-                                // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
-                               // fragmentTransaction = true;
+                                tag="mapaReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                Bundle args = new Bundle();
+                                args.putInt("tipo_mapa",0);
+                                if(fragment==null) {
+                                    fragment = new MapaFragment();
+                                    fragment.setArguments(args);
+                                    //((MapaFragment) fragment).setListener(this); // TODO: todavia no se puede setear esta actividad como listener porque acá no hay metodo que implemente alguna interfaz en MapaFragment
+                                }
+                                fragmentTransaction = true;
                                 break;
                             case R.id.optHeatMap:
                                 //TODO HABILITAR
@@ -94,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                     }
                 });
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
