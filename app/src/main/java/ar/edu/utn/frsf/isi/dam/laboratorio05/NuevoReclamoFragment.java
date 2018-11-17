@@ -81,7 +81,6 @@ public class NuevoReclamoFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 listener.obtenerCoordenadas();
-
             }
         });
 

@@ -17,12 +17,22 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
+    private onMapaListener listener;
+
+    public interface onMapaListener{
+        void coordenadasSeleccionadas(LatLng c);
+    }
+
+    public void setListener(onMapaListener listener) {
+        this.listener = listener;
+    }
 
     public MapaFragment() {
     }
@@ -38,10 +48,21 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         getMapAsync(this);
         return rootView;
     }
+
     @Override
     public void onMapReady(GoogleMap map) {
         miMapa = map;
         actualizar();
+
+        Bundle argumentos = getArguments();
+        if(argumentos !=null)
+            if (argumentos .getInt("tipo_mapa",0)==1)
+                map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
+                    @Override
+                    public void onMapLongClick(LatLng latLng) {
+                        listener.coordenadasSeleccionadas(latLng);
+                    }
+                });
     }
 
     private void actualizar(){
