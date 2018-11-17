@@ -7,4 +7,11 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="solicPermisoUbic">Se necesitarán permisos</string>
+    <string name="textoSolicPermUbic">Para poder ubicar la zona donde se encuentra actualmente y ayudar con la ubicación de nuevos reclamos es necesario acceder a su ubicación actual.</string>
+
+    <string name="ok">Ok</string>
+    <string name="no">No</string>
+    <string name="errorUbicacion">Error de ubicación, permisos insuficientes.</string>
+    <string name="avisoReabrirMapa">Por favor, vuelva a abrir el mapa para poder usar la ubicación.</string>
 </resources>
