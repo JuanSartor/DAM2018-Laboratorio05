@@ -3,6 +3,7 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 tag="mapaReclamos";
                                 fragment =  getSupportFragmentManager().findFragmentByTag(tag);
                                 Bundle args = new Bundle();
-                                args.putInt("tipo_mapa",0);
+                                args.putInt("tipo_mapa",2);
                                 if(fragment==null) {
                                     fragment = new MapaFragment();
                                     fragment.setArguments(args);
@@ -139,19 +140,25 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             Bundle bundle = new Bundle();
             bundle.putString("latLng",c.latitude+";"+c.longitude);
             fragment.setArguments(bundle);
+
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .remove(getSupportFragmentManager().findFragmentByTag("nuevoReclamoFragment"))
+                    .remove(getSupportFragmentManager().findFragmentByTag("seleccionCoordenadas"))
+                    .commit();      // esto es para que cuando uno seleccione coordenadas
+                                    // y apreta la fecha hacia atras, no vuelva a
+                                    // seleccion de coordenadas, sino a la imagen principal
+
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.contenido, fragment,tag)
-                    .addToBackStack(null)  //TODO: ver si este no se puede sacar
-                                            // para que cuando uno selecciono coordenadas
-                                            // y apreta la fecha hacia atras, no vuelva a
-                                            // seleccion de coordenadas, sino a la imagen principal
                     .commit();
         }
 
 
         @Override
         public void obtenerCoordenadas() {
+
             Fragment fragmento;
             Bundle args = new Bundle();
 
@@ -164,7 +171,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
             getSupportFragmentManager()
                     .beginTransaction()
                     .replace(R.id.contenido, fragmento,"seleccionCoordenadas")
-                    .addToBackStack(null)
+                    //.addToBackStack(null)  // si combino esto con los remove de fragmentos de la funcion
+                                             // coordenadasSeleccionadas se produce un error. Si se pone esto
+                                             // hay que sacar lo otro.
                     .commit();
 
             getSupportActionBar().setTitle("Seleccione coordenadas:");

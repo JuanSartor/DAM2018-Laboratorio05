@@ -3,8 +3,11 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
@@ -14,10 +17,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.List;
+
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.ReclamoDao;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -25,6 +37,9 @@ import com.google.android.gms.maps.model.LatLng;
 public class MapaFragment extends SupportMapFragment implements OnMapReadyCallback {
     private GoogleMap miMapa;
     private onMapaListener listener;
+    private Double maxlat =null, maxlon = null;
+    private Double minlat =null, minlon = null;
+    private List<Reclamo> reclamos;
 
     public interface onMapaListener{
         void coordenadasSeleccionadas(LatLng c);
@@ -55,14 +70,62 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         actualizar();
 
         Bundle argumentos = getArguments();
-        if(argumentos !=null)
-            if (argumentos .getInt("tipo_mapa",0)==1)
+        if(argumentos !=null) {
+            if (argumentos.getInt("tipo_mapa", 0) == 1)
                 map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                     @Override
                     public void onMapLongClick(LatLng latLng) {
                         listener.coordenadasSeleccionadas(latLng);
                     }
                 });
+
+            if (argumentos.getInt("tipo_mapa", 0) == 2){
+
+                Runnable hiloReclamos = new Runnable() {
+                    @Override
+                    public void run() {
+                        ReclamoDao reclamoDao = MyDatabase.getInstance(getActivity()).getReclamoDao();
+                        reclamos = reclamoDao.getAll();
+                    }
+                };
+                Thread t1 = new Thread(hiloReclamos);
+                t1.start();
+                try {
+                    Thread.sleep(1500); //TODO: si no duermo el hilo...como obtengo reclamos ANTES de dibujar el mapa?
+                    for (Reclamo r: reclamos) {
+
+                        // TODO: retenerMaxMin se podria hacer de otra forma?
+                        retenerMaxMin(r);
+                        miMapa.addMarker(new MarkerOptions().
+                                position(new LatLng(r.getLatitud(), r.getLongitud())).
+                                title(String.valueOf(r.getId())+" - "+r.getTipo()).
+                                snippet(r.getReclamo()).
+                                draggable(false));
+                        LatLngBounds limites = new LatLngBounds(new LatLng(minlat-0.005,minlon-0.005), new LatLng(maxlat+0.005,maxlon+0.005));
+                        miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private void retenerMaxMin(Reclamo r){
+        if (maxlat==null && minlat == null && maxlon==null && minlon==null) {
+            maxlat = r.getLatitud();
+            minlat = r.getLatitud();
+            maxlon = r.getLongitud();
+            minlon = r.getLongitud();
+        }
+        if (maxlat<r.getLatitud())
+            maxlat=r.getLatitud();
+        else if (minlat>r.getLatitud())
+            minlat=r.getLatitud();
+        if (maxlon<r.getLongitud())
+            maxlon=r.getLongitud();
+        else if (minlon>r.getLongitud())
+            minlon=r.getLongitud();
     }
 
     private void actualizar(){
@@ -90,7 +153,19 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
             else
                 ActivityCompat.requestPermissions(getActivity(),perm,5);
             return;}
+
+        //Lo que empieza aca:
+        LocationManager locationManagerCt = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+        Location locationCt = locationManagerCt.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        LatLng latLng = new LatLng(locationCt.getLatitude(),
+                locationCt.getLongitude());
+
         miMapa.setMyLocationEnabled(true);
+
+        miMapa.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        miMapa.animateCamera(CameraUpdateFactory.zoomTo(15));
+        //y llega hasta aca, salvo el "setMyLocationEnabled" es para que mueva la camara
+        // automaticamente al lugar donde uno esta ubicado
     }
 
     @Override
