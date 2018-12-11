@@ -40,6 +40,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
     private Double maxlat =null, maxlon = null;
     private Double minlat =null, minlon = null;
     private List<Reclamo> reclamos;
+    private Reclamo reclamo;
 
     public interface onMapaListener{
         void coordenadasSeleccionadas(LatLng c);
@@ -69,7 +70,7 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         miMapa = map;
         actualizar();
 
-        Bundle argumentos = getArguments();
+        final Bundle argumentos = getArguments();
         if(argumentos !=null) {
             if (argumentos.getInt("tipo_mapa", 0) == 1)
                 map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
@@ -105,6 +106,33 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                         miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));
                     }
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (argumentos.getInt("tipo_mapa", 0) == 3){
+
+                Runnable hiloBuscarReclamo = new Runnable() {
+                    @Override
+                    public void run() {
+                        ReclamoDao reclamoDao = MyDatabase.getInstance(getActivity()).getReclamoDao();
+                        reclamo = reclamoDao.getById(argumentos.getInt("idReclamo", 0));
+                    }
+                };
+                Thread t1 = new Thread(hiloBuscarReclamo);
+                t1.start();
+
+                try {
+                    Thread.sleep(1500);
+                    miMapa.addMarker(new MarkerOptions().
+                            position(new LatLng(reclamo.getLatitud(), reclamo.getLongitud())).
+                            title(String.valueOf(reclamo.getId()) + " - " + reclamo.getTipo()).
+                            snippet(reclamo.getReclamo()).
+                            draggable(false));
+
+                    LatLng centro = new LatLng(reclamo.getLatitud(), reclamo.getLongitud());
+                    miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(centro, 17));
+                }
+                catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
