@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
@@ -67,9 +68,9 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                             case R.id.optVerMapa:
                                 tag="mapaReclamos";
                                 fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-                                Bundle args = new Bundle();
-                                args.putInt("tipo_mapa",2);
                                 if(fragment==null) {
+                                    Bundle args = new Bundle();
+                                    args.putInt("tipo_mapa",2);
                                     fragment = new MapaFragment();
                                     fragment.setArguments(args);
                                     ((MapaFragment) fragment).setListener(MainActivity.this);
@@ -77,12 +78,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                 fragmentTransaction = true;
                                 break;
                             case R.id.optHeatMap:
-                                //TODO HABILITAR
-                                //tag="mapaReclamos";
-                                //fragment =  getSupportFragmentManager().findFragmentByTag(tag);
-                                //TODO si "fragment" es null entonces crear el fragmento mapa, agregar un bundel con el parametro tipo_mapa
-                                // configurar a la actividad como listener de los eventos del mapa ((MapaFragment) fragment).setListener(this);
-                               // fragmentTransaction = true;
+                                tag="mapaReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment==null) {
+                                    Bundle args2 = new Bundle();
+                                    args2.putInt("tipo_mapa",4);
+                                    fragment = new MapaFragment();
+                                    fragment.setArguments(args2);
+                                    ((MapaFragment) fragment).setListener(MainActivity.this);
+                                }
+                                fragmentTransaction = true;
                                 break;
                         }
 
@@ -177,6 +182,8 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                     .commit();
 
             getSupportActionBar().setTitle("Seleccione coordenadas:");
+
+            Toast.makeText(this, getString(R.string.seleccionCoord), Toast.LENGTH_LONG).show();
         }
 }
 
