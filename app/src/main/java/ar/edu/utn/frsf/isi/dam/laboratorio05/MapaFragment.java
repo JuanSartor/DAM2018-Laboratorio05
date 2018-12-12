@@ -6,6 +6,7 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Build;
@@ -21,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -130,7 +132,15 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                             draggable(false));
 
                     LatLng centro = new LatLng(reclamo.getLatitud(), reclamo.getLongitud());
-                    miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(centro, 17));
+                    miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(centro, 15));
+
+                    CircleOptions circleOptions = new CircleOptions()
+                            .center(centro)
+                            .radius(500)
+                            .strokeColor(Color.RED)
+                            .fillColor(0x22FF0000)
+                            .strokeWidth(5);
+                    miMapa.addCircle(circleOptions);
                 }
                 catch (InterruptedException e) {
                     e.printStackTrace();
