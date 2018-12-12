@@ -64,12 +64,10 @@ public class NuevoReclamoFragment extends Fragment {
         tipoReclamo.setAdapter(tipoReclamoAdapter);
 
         int idReclamo =0;
-        if(getArguments()!=null)  {
-            idReclamo = getArguments().getInt("idReclamo",0);
-        }
+        if(getArguments()!=null){
+            idReclamo = getArguments().getInt("idReclamo",0);}
 
         cargarReclamo(idReclamo);
-
 
         boolean edicionActivada = !tvCoord.getText().toString().equals("0;0");
         reclamoDesc.setEnabled(edicionActivada );
@@ -80,15 +78,13 @@ public class NuevoReclamoFragment extends Fragment {
         buscarCoord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                listener.obtenerCoordenadas();
-            }
+                listener.obtenerCoordenadas();}
         });
 
         btnGuardar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                saveOrUpdateReclamo();
-            }
+                saveOrUpdateReclamo();}
         });
         return v;
     }

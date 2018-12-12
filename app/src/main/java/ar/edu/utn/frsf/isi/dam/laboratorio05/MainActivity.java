@@ -14,12 +14,15 @@ import android.widget.Toast;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.LatLng;
 
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.Reclamo;
+import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.TipoReclamoConverter;
+
 
 // AGREGAR en MapaFragment una interface MapaFragment.OnMapaListener con el método coordenadasSeleccionadas 
 // IMPLEMENTAR dicho método en esta actividad.
 
 public class MainActivity extends AppCompatActivity implements FragmentManager.OnBackStackChangedListener,
-        NuevoReclamoFragment.OnNuevoLugarListener, MapaFragment.onMapaListener {
+        NuevoReclamoFragment.OnNuevoLugarListener, MapaFragment.onMapaListener, BusquedaFragment.buscarListener {
 
     private DrawerLayout drawerLayout;
     private NavigationView navView;
@@ -86,6 +89,16 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                                     fragment = new MapaFragment();
                                     fragment.setArguments(args2);
                                     ((MapaFragment) fragment).setListener(MainActivity.this);
+                                }
+                                fragmentTransaction = true;
+                                break;
+
+                            case R.id.optBusqueda:
+                                tag="buscarReclamos";
+                                fragment =  getSupportFragmentManager().findFragmentByTag(tag);
+                                if(fragment==null) {
+                                    fragment = new BusquedaFragment();
+                                    ((BusquedaFragment) fragment).setListener(MainActivity.this);
                                 }
                                 fragmentTransaction = true;
                                 break;
@@ -185,5 +198,27 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
             Toast.makeText(this, getString(R.string.seleccionCoord), Toast.LENGTH_LONG).show();
         }
+
+    @Override
+    public void ubicarResultados(Reclamo.TipoReclamo tipo){
+        Fragment fragmento;
+        Bundle args = new Bundle();
+
+        args.putInt("tipo_mapa",5);
+        args.putString("tipo_reclamo",TipoReclamoConverter.toString(tipo));
+
+        fragmento= new MapaFragment();
+        fragmento.setArguments(args);
+
+        ((MapaFragment) fragmento).setListener(MainActivity.this);
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.contenido, fragmento,"ubicarResultados")
+                .addToBackStack(null)
+                .commit();
+
+        getSupportActionBar().setTitle("Resultados de la Busqueda:");
+    }
 }
 
