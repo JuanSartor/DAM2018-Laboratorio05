@@ -15,4 +15,7 @@
     <string name="errorUbicacion">Error de ubicación, permisos insuficientes.</string>
     <string name="avisoReabrirMapa">Por favor, vuelva a abrir el mapa para poder usar la ubicación.</string>
     <string name="seleccionCoord">Mantenga presionado en la ubicacion del reclamo.</string>
+    <string name="btnBuscar">BUSCAR</string>
+    <string name="tipoBusqueda">Buscar por tipo de reclamo</string>
+    <string name="ceroReclamos">No existen reclamos (o reclamos de ese tipo).</string>
 </resources>

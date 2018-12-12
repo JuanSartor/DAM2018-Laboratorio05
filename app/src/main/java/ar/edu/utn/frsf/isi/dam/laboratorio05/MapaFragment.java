@@ -26,6 +26,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 
@@ -78,16 +79,17 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
         final Bundle argumentos = getArguments();
         if(argumentos !=null) {
             switch(argumentos.getInt("tipo_mapa", 0)){
+
                 case 1:
                     map.setOnMapLongClickListener(new GoogleMap.OnMapLongClickListener() {
                         @Override
                         public void onMapLongClick(LatLng latLng) {
                             listener.coordenadasSeleccionadas(latLng);
-                        }
-                    });
+                        }});
                     break;
 
                 case 2:
+                    reclamos=null;
                     Runnable hiloReclamos = new Runnable() {
                         @Override
                         public void run() {
@@ -95,28 +97,32 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                             reclamos = reclamoDao.getAll();
                         }
                     };
-                    Thread t1 = new Thread(hiloReclamos);
-                    t1.start();
+                    Thread t2 = new Thread(hiloReclamos);
+                    t2.start();
                     try {
                         Thread.sleep(1500); //TODO: si no duermo el hilo...como obtengo reclamos ANTES de dibujar el mapa?
-                        for (Reclamo r: reclamos) {
 
-                            // TODO: retenerMaxMin se podria hacer de otra forma?
-                            retenerMaxMin(r);
-                            miMapa.addMarker(new MarkerOptions().
-                                    position(new LatLng(r.getLatitud(), r.getLongitud())).
-                                    title(String.valueOf(r.getId())+" - "+r.getTipo()).
-                                    snippet(r.getReclamo()).
-                                    draggable(false));
-                        }
-                        LatLngBounds limites = new LatLngBounds(new LatLng(minlat-0.005,minlon-0.005), new LatLng(maxlat+0.005,maxlon+0.005));
-                        miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));
+                        if(reclamos.size()>0) {
+                            for (Reclamo r : reclamos) {
+
+                                // TODO: retenerMaxMin se podria hacer de otra forma?
+                                retenerMaxMin(r);
+                                miMapa.addMarker(new MarkerOptions().
+                                        position(new LatLng(r.getLatitud(), r.getLongitud())).
+                                        title(String.valueOf(r.getId()) + " - " + r.getTipo()).
+                                        snippet(r.getReclamo()).
+                                        draggable(false));
+                            }
+                            LatLngBounds limites = new LatLngBounds(new LatLng(minlat - 0.005, minlon - 0.005), new LatLng(maxlat + 0.005, maxlon + 0.005));
+                            miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));}
+                        else
+                            Toast.makeText(getActivity(), getString(R.string.ceroReclamos), Toast.LENGTH_LONG).show();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                        e.printStackTrace(); }
                     break;
 
                 case 3:
+                    reclamos=null;
                     Runnable hiloBuscarReclamo = new Runnable() {
                         @Override
                         public void run() {
@@ -124,62 +130,97 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                             reclamo = reclamoDao.getById(argumentos.getInt("idReclamo", 0));
                         }
                     };
-                    Thread t2 = new Thread(hiloBuscarReclamo);
-                    t2.start();
+                    Thread t3 = new Thread(hiloBuscarReclamo);
+                    t3.start();
 
                     try {
                         Thread.sleep(1500);
-                        miMapa.addMarker(new MarkerOptions().
-                                position(new LatLng(reclamo.getLatitud(), reclamo.getLongitud())).
-                                title(String.valueOf(reclamo.getId()) + " - " + reclamo.getTipo()).
-                                snippet(reclamo.getReclamo()).
-                                draggable(false));
+                        if(reclamos.size()>0) {
+                            miMapa.addMarker(new MarkerOptions().
+                                    position(new LatLng(reclamo.getLatitud(), reclamo.getLongitud())).
+                                    title(String.valueOf(reclamo.getId()) + " - " + reclamo.getTipo()).
+                                    snippet(reclamo.getReclamo()).
+                                    draggable(false));
 
-                        LatLng centro = new LatLng(reclamo.getLatitud(), reclamo.getLongitud());
-                        miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(centro, 15));
+                            LatLng centro = new LatLng(reclamo.getLatitud(), reclamo.getLongitud());
+                            miMapa.moveCamera(CameraUpdateFactory.newLatLngZoom(centro, 15));
 
-                        CircleOptions circleOptions = new CircleOptions()
-                                .center(centro)
-                                .radius(500)
-                                .strokeColor(Color.RED)
-                                .fillColor(0x22FF0000)
-                                .strokeWidth(5);
-                        miMapa.addCircle(circleOptions);
-                    }
-                    catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                            CircleOptions circleOptions = new CircleOptions()
+                                    .center(centro)
+                                    .radius(500)
+                                    .strokeColor(Color.RED)
+                                    .fillColor(0x22FF0000)
+                                    .strokeWidth(5);
+                            miMapa.addCircle(circleOptions);}
+                        else
+                            Toast.makeText(getActivity(), getString(R.string.ceroReclamos), Toast.LENGTH_LONG).show();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace(); }
                     break;
 
                 case 4:
+                    reclamos=null;
                     Runnable hiloReclamosHeat = new Runnable() {
                         @Override
                         public void run() {
                             ReclamoDao reclamoDao = MyDatabase.getInstance(getActivity()).getReclamoDao();
-                            reclamos = reclamoDao.getAll();
-                        }
+                            reclamos = reclamoDao.getAll();}
                     };
-                    Thread t3 = new Thread(hiloReclamosHeat);
-                    t3.start();
+                    Thread t4 = new Thread(hiloReclamosHeat);
+                    t4.start();
                     try {
                         Thread.sleep(1500); //TODO: si no duermo el hilo...como obtengo reclamos ANTES de dibujar el mapa?
-                        List<LatLng> lista=new ArrayList<LatLng>();
+                        if(reclamos.size()>0) {
+                            List<LatLng> lista=new ArrayList<LatLng>();
 
-                        for(Reclamo r: reclamos){
-                            retenerMaxMin(r);
-                            lista.add(new LatLng(r.getLatitud(), r.getLongitud()));
-                        }
+                            for(Reclamo r: reclamos){
+                                retenerMaxMin(r);
+                                lista.add(new LatLng(r.getLatitud(), r.getLongitud()));}
 
-                        HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(lista)
-                                .build();
-                        miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
+                            HeatmapTileProvider mProvider = new HeatmapTileProvider.Builder().data(lista)
+                                    .build();
+                            miMapa.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
 
-                        LatLngBounds limites = new LatLngBounds(new LatLng(minlat-0.005,minlon-0.005), new LatLng(maxlat+0.005,maxlon+0.005));
-                        miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));
-
+                            LatLngBounds limites = new LatLngBounds(new LatLng(minlat-0.005,minlon-0.005), new LatLng(maxlat+0.005,maxlon+0.005));
+                            miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));}
+                        else
+                            Toast.makeText(getActivity(), getString(R.string.ceroReclamos), Toast.LENGTH_LONG).show();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                        e.printStackTrace(); }
+                    break;
+
+                case 5:
+                    reclamos=null;
+                    Runnable hiloBusquedaTipos = new Runnable() {
+                        @Override
+                        public void run() {
+                            ReclamoDao reclamoDao = MyDatabase.getInstance(getActivity()).getReclamoDao();
+                            reclamos = reclamoDao.getByTipo(argumentos.getString("tipo_reclamo"));}
+                    };
+                    Thread t5 = new Thread(hiloBusquedaTipos);
+                    t5.start();
+                    try {
+                        Thread.sleep(1500);
+                        if(reclamos.size()>0) {
+                            PolylineOptions rectOptions = new PolylineOptions();
+                            for(Reclamo r: reclamos) {
+                                retenerMaxMin(r);
+                                rectOptions.add(new LatLng(r.getLatitud(), r.getLongitud())).color(Color.RED);
+                                miMapa.addMarker(new MarkerOptions().
+                                        position(new LatLng(r.getLatitud(), r.getLongitud())).
+                                        title(String.valueOf(r.getId())+" - "+r.getTipo()).
+                                        snippet(r.getReclamo()).
+                                        draggable(false));}
+
+                            miMapa.addPolyline(rectOptions);
+
+                            LatLngBounds limites = new LatLngBounds(new LatLng(minlat-0.005,minlon-0.005), new LatLng(maxlat+0.005,maxlon+0.005));
+                            miMapa.moveCamera(CameraUpdateFactory.newLatLngBounds(limites, 10));
+                        }
+                        else
+                            Toast.makeText(getActivity(), getString(R.string.ceroReclamos), Toast.LENGTH_LONG).show();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();}
                     break;
             }
         }
