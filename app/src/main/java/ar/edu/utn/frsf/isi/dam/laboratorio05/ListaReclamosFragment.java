@@ -79,13 +79,16 @@ public class ListaReclamosFragment extends Fragment {
 
         @Override
         public void mostrarMapa(int id) {
-            Fragment f = null;// setear el fragmento del mapa
+            Fragment f = new MapaFragment();
             Bundle args = new Bundle();
-            // setear los parametros tipo_mapa y idReclamo en el Bundle args
+
+            args.putInt("tipo_mapa",3);
+            args.putInt("idReclamo",id);
+
             f.setArguments(args);
             getActivity().getSupportFragmentManager()
                     .beginTransaction()
-                    .replace(R.id.contenido, f)
+                    .replace(R.id.contenido, f, "mostrarReclamo")
                     .commit();
         }
     };
