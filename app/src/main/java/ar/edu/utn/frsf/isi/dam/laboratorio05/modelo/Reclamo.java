@@ -16,6 +16,16 @@ public class Reclamo {
     private Double longitud;
     private String reclamo;
     private String email;
+    private String pathImagen;
+
+    public String getPathImagen() {
+        return pathImagen;
+    }
+
+    public void setPathImagen(String pathImagen) {
+        this.pathImagen = pathImagen;
+    }
+
     @TypeConverters(TipoReclamoConverter.class)
     private TipoReclamo tipo;
 
