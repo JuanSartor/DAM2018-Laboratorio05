@@ -41,12 +41,14 @@ public class ReclamoArrayAdapter extends ArrayAdapter<Reclamo> {
         }
         TextView tvTitulo = (TextView) v.findViewById(R.id.fila_reclamo_titulo);
         TextView tvTipo = (TextView) v.findViewById(R.id.fila_reclamo_tipo);
+        TextView pathrec=(TextView)v.findViewById(R.id.fila_reclamo_path);
         Button btnEditar= (Button) v.findViewById(R.id.btnEditar);
         Button btnBorrar= (Button) v.findViewById(R.id.btnBorrar);
         Button btnVerMapa= (Button) v.findViewById(R.id.btnVerEnMapa);
         Reclamo aux = getItem(position);
         tvTitulo.setText(aux.getReclamo());
         tvTipo.setText(aux.getTipo().toString());
+        pathrec.setText(aux.getPathImagen());
         btnEditar.setTag(aux.getId());
         btnEditar.setOnClickListener(new View.OnClickListener() {
             @Override

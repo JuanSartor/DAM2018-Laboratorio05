@@ -6,6 +6,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".NuevoReclamoFragment">
+
+   <ScrollView
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+
+       <LinearLayout
+           android:layout_width="match_parent"
+           android:layout_height="match_parent"
+           android:orientation="vertical">
     <TextView
         android:text="Coordenadas"
         android:layout_width="match_parent"
@@ -67,4 +76,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Guardar" />
-</LinearLayout>
+       </LinearLayout>
+
+   </ScrollView>
+       </LinearLayout>

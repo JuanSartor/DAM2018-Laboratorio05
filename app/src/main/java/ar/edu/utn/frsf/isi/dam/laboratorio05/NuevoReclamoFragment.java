@@ -72,7 +72,7 @@ public class NuevoReclamoFragment extends Fragment {
         reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
 
         View v = inflater.inflate(R.layout.fragment_nuevo_reclamo, container, false);
-
+        pathFoto=null;
         reclamoDesc = (EditText) v.findViewById(R.id.reclamo_desc);
         mail= (EditText) v.findViewById(R.id.reclamo_mail);
         tipoReclamo= (Spinner) v.findViewById(R.id.reclamo_tipo);
@@ -165,6 +165,10 @@ public class NuevoReclamoFragment extends Fragment {
             reclamoActual.setLatitud(Double.valueOf(coordenadas[0]));
             reclamoActual.setLongitud(Double.valueOf(coordenadas[1]));
         }
+        if(pathFoto==null){
+            reclamoActual.setPathImagen(pathFoto);
+
+        }
         Runnable hiloActualizacion = new Runnable() {
             @Override
             public void run() {
@@ -178,6 +182,7 @@ public class NuevoReclamoFragment extends Fragment {
                         mail.setText(R.string.texto_vacio);
                         tvCoord.setText(R.string.texto_vacio);
                         reclamoDesc.setText(R.string.texto_vacio);
+                        miniImagen.setImageBitmap(null);
                         getActivity().getFragmentManager().popBackStack();
                     }
                 });
@@ -202,11 +207,12 @@ public class NuevoReclamoFragment extends Fragment {
 
             if(foto_file!=null){
 //aca
-                Uri foto_URI = FileProvider.getUriForFile(getContext(),
+                Uri foto_URI = FileProvider.getUriForFile(getActivity().getApplication(),
                         "com.example.android.fileprovider",
                         foto_file);
                 i1.putExtra(MediaStore.EXTRA_OUTPUT, foto_URI);
             startActivityForResult(i1, REQUEST_IMAGE_SAVE);
+            reclamoActual.setPathImagen(pathFoto);
             }
 
         }
