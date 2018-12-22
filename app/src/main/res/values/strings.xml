@@ -19,4 +19,5 @@
     <string name="tipoBusqueda">Buscar por tipo de reclamo</string>
     <string name="ceroReclamos">No existen reclamos (o reclamos de ese tipo).</string>
     <string name="btnTomarfoto">Tomar Foto</string>
+    <string name="btnGrabarAudio">Grabar Audio</string>
 </resources>
