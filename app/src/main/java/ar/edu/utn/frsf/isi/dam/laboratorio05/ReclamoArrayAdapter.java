@@ -23,6 +23,7 @@ public class ReclamoArrayAdapter extends ArrayAdapter<Reclamo> {
         public void editarReclamo(int id);
         public void borrarReclamo(int id);
         public void mostrarMapa(int id);
+        public void reproducirAudio(int id);
     }
 
     public void setOnReclamoListener(OnReclamoListener listener){
@@ -45,6 +46,7 @@ public class ReclamoArrayAdapter extends ArrayAdapter<Reclamo> {
         Button btnEditar= (Button) v.findViewById(R.id.btnEditar);
         Button btnBorrar= (Button) v.findViewById(R.id.btnBorrar);
         Button btnVerMapa= (Button) v.findViewById(R.id.btnVerEnMapa);
+        Button btnReproducirAudio= (Button) v.findViewById(R.id.btnReproducir);
         Reclamo aux = getItem(position);
         tvTitulo.setText(aux.getReclamo());
         tvTipo.setText(aux.getTipo().toString());
@@ -72,6 +74,13 @@ public class ReclamoArrayAdapter extends ArrayAdapter<Reclamo> {
             public void onClick(View view) {
                 int id = Integer.valueOf(view.getTag().toString());
                 listenerOnReclamo.mostrarMapa(id);
+            }
+        });
+        btnReproducirAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int id = Integer.valueOf(v.getTag().toString());
+                listenerOnReclamo.reproducirAudio(id);
             }
         });
         return v;

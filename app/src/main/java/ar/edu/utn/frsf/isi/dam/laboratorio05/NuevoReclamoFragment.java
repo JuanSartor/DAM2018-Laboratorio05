@@ -1,16 +1,22 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 
+import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +32,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import android.os.Environment;
+import android.widget.Toast;
 
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
@@ -59,6 +66,10 @@ public class NuevoReclamoFragment extends Fragment {
     private OnNuevoLugarListener listener;
     private ImageView miniImagen;
     private String pathFoto;
+    private Button btnGrabarAudio;
+    private MediaRecorder mRecorder;
+    private String mFileName;
+    private static final String LOG_TAG = "AudioRecordTest";
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
@@ -81,6 +92,9 @@ public class NuevoReclamoFragment extends Fragment {
         btnGuardar= (Button) v.findViewById(R.id.btnGuardar);
         btnFoto= (Button)  v.findViewById(R.id.btnTomarFoto);
         miniImagen= (ImageView) v.findViewById(R.id.foto);
+        btnGrabarAudio=(Button) v.findViewById(R.id.btnGrabarAudio);
+
+
 
         tipoReclamoAdapter = new ArrayAdapter<Reclamo.TipoReclamo>(getActivity(),android.R.layout.simple_spinner_item,Reclamo.TipoReclamo.values());
         tipoReclamoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -115,6 +129,14 @@ public class NuevoReclamoFragment extends Fragment {
             public void onClick(View v) {
                 sacarGuardarFoto();
 
+            }
+        });
+
+        btnGrabarAudio.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                grabarAudio();
             }
         });
 
@@ -167,8 +189,8 @@ public class NuevoReclamoFragment extends Fragment {
         }
         if(pathFoto==null){
             reclamoActual.setPathImagen(pathFoto);
-
         }
+        reclamoActual.setPathAudio(mFileName);
         Runnable hiloActualizacion = new Runnable() {
             @Override
             public void run() {
@@ -256,6 +278,42 @@ public class NuevoReclamoFragment extends Fragment {
            }
 
        }
+
+    }
+
+
+    public void grabarAudio(){
+
+        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, 1000);
+        }
+
+
+        if(mRecorder==null){
+            mFileName = Environment.getExternalStorageDirectory()
+                    .getAbsolutePath()+"/audiorecordtest.3gp";
+
+            mRecorder = new MediaRecorder();
+            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mRecorder.setOutputFile(mFileName);
+            try {
+                mRecorder.prepare();
+                mRecorder.start();
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "prepare() failed");
+            }
+
+        }
+        else if(mRecorder!=null){
+            mRecorder.stop();
+            mRecorder.release();
+            mRecorder=null;
+            Toast.makeText(getActivity(),"Grabacion finalizada",Toast.LENGTH_SHORT).show();
+
+
+        }
 
     }
 

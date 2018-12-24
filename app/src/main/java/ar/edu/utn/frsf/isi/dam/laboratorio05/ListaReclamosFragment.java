@@ -1,13 +1,17 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +30,7 @@ public class ListaReclamosFragment extends Fragment {
     private List<Reclamo> listaReclamos;
     private ListView lvReclamos;
     private ReclamoDao reclamoDao;
+    private static final String LOG_TAG = "AudioRecordTest";
     public ListaReclamosFragment() {
         // Required empty public constructor
     }
@@ -90,6 +95,23 @@ public class ListaReclamosFragment extends Fragment {
                     .beginTransaction()
                     .replace(R.id.contenido, f, "mostrarReclamo")
                     .commit();
+        }
+
+        public void reproducirAudio(int id){
+
+             MediaPlayer mPlayer = new MediaPlayer();
+            try {
+                mPlayer.setDataSource(reclamoDao.getById(id).getPathAudio());
+                mPlayer.prepare();
+
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "prepare() failed");
+            }
+            mPlayer.start();
+            Toast.makeText(getActivity(),"Reproduciendo Audio",Toast.LENGTH_SHORT).show();
+
+
+
         }
     };
 
