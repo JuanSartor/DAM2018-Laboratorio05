@@ -41,9 +41,12 @@ public class RecuperarReclamosAsync extends AsyncTask<ParamsAsyncTask,Integer,Li
         ReclamoDao reclamoDao = MyDatabase.getInstance(actividad).getReclamoDao();
         if (tipo==3) {
             reclamo = reclamoDao.getById(parametros[0].argumentos.getInt("idReclamo", 0));
-            reclamos.add(reclamo);
-        }else
-            reclamos = reclamoDao.getAll();
+            reclamos.add(reclamo);}
+        else{
+            if (tipo==5)
+                reclamos = reclamoDao.getByTipo(parametros[0].argumentos.getString("tipo_reclamo"));
+            else
+                reclamos = reclamoDao.getAll();}
         return reclamos;
     }
 
