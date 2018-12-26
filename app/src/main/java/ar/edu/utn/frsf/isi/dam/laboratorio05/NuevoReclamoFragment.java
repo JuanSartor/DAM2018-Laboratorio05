@@ -11,9 +11,12 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -26,6 +29,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import android.os.Environment;
+import android.widget.Toast;
 
 
 import ar.edu.utn.frsf.isi.dam.laboratorio05.modelo.MyDatabase;
@@ -58,7 +62,8 @@ public class NuevoReclamoFragment extends Fragment {
     private Button btnFoto;
     private OnNuevoLugarListener listener;
     private ImageView miniImagen;
-    private String pathFoto;
+    private String pathFoto=null;
+    private Boolean imagenCapturada=false;
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
     public NuevoReclamoFragment() {
@@ -72,7 +77,6 @@ public class NuevoReclamoFragment extends Fragment {
         reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
 
         View v = inflater.inflate(R.layout.fragment_nuevo_reclamo, container, false);
-        pathFoto=null;
         reclamoDesc = (EditText) v.findViewById(R.id.reclamo_desc);
         mail= (EditText) v.findViewById(R.id.reclamo_mail);
         tipoReclamo= (Spinner) v.findViewById(R.id.reclamo_tipo);
@@ -98,6 +102,51 @@ public class NuevoReclamoFragment extends Fragment {
         tipoReclamo.setEnabled(edicionActivada);
         btnGuardar.setEnabled(edicionActivada);
 
+        if(idReclamo==0)
+            btnGuardar.setEnabled(false);
+
+        tipoReclamo.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Reclamo.TipoReclamo tr = tipoReclamoAdapter.getItem(position);
+                if(tr==Reclamo.TipoReclamo.VEREDAS ||
+                        tr==Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO){
+                    if(pathFoto==null){
+                        btnGuardar.setEnabled(false);
+                        Toast.makeText(getActivity(), getString(R.string.sacarFoto), Toast.LENGTH_LONG).show();}
+                    else
+                        btnGuardar.setEnabled(true);}
+                else{
+                    if(reclamoDesc.getText().toString().length()<8){
+                        btnGuardar.setEnabled(false);
+                        Toast.makeText(getActivity(), getString(R.string.descripcionOSonido), Toast.LENGTH_LONG).show();}
+                    else
+                        btnGuardar.setEnabled(true);}
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        reclamoDesc.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Reclamo.TipoReclamo tr = tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition());
+                if(tr!=Reclamo.TipoReclamo.VEREDAS && tr!=Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO){
+
+                    btnGuardar.setEnabled(s.length()>=8 && !tvCoord.getText().toString().equals("0;0"));
+                    //TODO: modificar condicion de lo de audio cuando este
+                }
+            }
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+
         buscarCoord.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,11 +163,8 @@ public class NuevoReclamoFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 sacarGuardarFoto();
-
             }
         });
-
-
         return v;
     }
 
@@ -134,6 +180,7 @@ public class NuevoReclamoFragment extends Fragment {
                             mail.setText(reclamoActual.getEmail());
                             tvCoord.setText(reclamoActual.getLatitud()+";"+reclamoActual.getLongitud());
                             reclamoDesc.setText(reclamoActual.getReclamo());
+                            miniImagen.setImageURI(Uri.parse(reclamoActual.getPathImagen()));
                             Reclamo.TipoReclamo[] tipos= Reclamo.TipoReclamo.values();
                             for(int i=0;i<tipos.length;i++) {
                                 if(tipos[i].equals(reclamoActual.getTipo())) {
@@ -153,7 +200,6 @@ public class NuevoReclamoFragment extends Fragment {
             tvCoord.setText(coordenadas);
             reclamoActual = new Reclamo();
         }
-
     }
 
     private void saveOrUpdateReclamo(){
@@ -167,7 +213,6 @@ public class NuevoReclamoFragment extends Fragment {
         }
         if(pathFoto==null){
             reclamoActual.setPathImagen(pathFoto);
-
         }
         Runnable hiloActualizacion = new Runnable() {
             @Override
@@ -184,6 +229,7 @@ public class NuevoReclamoFragment extends Fragment {
                         reclamoDesc.setText(R.string.texto_vacio);
                         miniImagen.setImageBitmap(null);
                         getActivity().getFragmentManager().popBackStack();
+                        btnGuardar.setEnabled(false);
                     }
                 });
             }
@@ -198,12 +244,9 @@ public class NuevoReclamoFragment extends Fragment {
         if(i1.resolveActivity(getActivity().getPackageManager())!=null){
             File foto_file= null;
             try{
-
-                foto_file= crearImagenFile();
-            }
+                foto_file= crearImagenFile();}
             catch (IOException e){
-                e.printStackTrace();
-            }
+                e.printStackTrace(); }
 
             if(foto_file!=null){
 //aca
@@ -211,12 +254,10 @@ public class NuevoReclamoFragment extends Fragment {
                         "com.example.android.fileprovider",
                         foto_file);
                 i1.putExtra(MediaStore.EXTRA_OUTPUT, foto_URI);
-            startActivityForResult(i1, REQUEST_IMAGE_SAVE);
-            reclamoActual.setPathImagen(pathFoto);
+                startActivityForResult(i1, REQUEST_IMAGE_SAVE);
+                reclamoActual.setPathImagen(pathFoto);
             }
-
-        }
-    }
+        }}
 
     private File crearImagenFile()throws IOException{
 
@@ -230,34 +271,35 @@ public class NuevoReclamoFragment extends Fragment {
         );
         pathFoto = image.getAbsolutePath();
         return image;
-
     }
 
-
-
-
-   public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             miniImagen.setImageBitmap(imageBitmap);
         }
 
-       if (requestCode == REQUEST_IMAGE_SAVE && resultCode == RESULT_OK) {
-           File file = new File(pathFoto);
-           Bitmap imageBitmap = null;
-           try {
-               imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.fromFile(file));
-           } catch (IOException e) {
-               e.printStackTrace();
-           }
-           if (imageBitmap != null) {
-               miniImagen.setImageBitmap(imageBitmap);
-           }
+        if (requestCode == REQUEST_IMAGE_SAVE && resultCode == RESULT_OK) {
+            File file = new File(pathFoto);
+            Bitmap imageBitmap = null;
+            try {
+                imageBitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), Uri.fromFile(file));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            if (imageBitmap != null) {
+                miniImagen.setImageBitmap(imageBitmap);
 
-       }
+                //se habilita el boton si se saco foto para VEREDAS o CALLE EN MAL ESTADO
+                Reclamo.TipoReclamo tr = tipoReclamoAdapter.getItem(tipoReclamo.getSelectedItemPosition());
 
+                if (!tvCoord.getText().toString().equals("0;0") && (tr==Reclamo.TipoReclamo.VEREDAS
+                        || tr==Reclamo.TipoReclamo.CALLE_EN_MAL_ESTADO))
+                    btnGuardar.setEnabled(true);
+            }
+        }
     }
 
-
+    //TODO: en metodo de grabar sonido se deberia chequear longitud de descripcion para habilitar el boton guardar
 }
