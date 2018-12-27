@@ -58,6 +58,9 @@ public class ReclamoArrayAdapter extends ArrayAdapter<Reclamo> {
         tvTitulo.setText(aux.getReclamo());
         tvTipo.setText(aux.getTipo().toString());
         pathrec.setText(aux.getPathImagen());
+
+        btnReproducirAudio.setEnabled(aux.getPathAudio()!=null);
+
         btnEditar.setTag(aux.getId());
         btnEditar.setOnClickListener(new View.OnClickListener() {
             @Override

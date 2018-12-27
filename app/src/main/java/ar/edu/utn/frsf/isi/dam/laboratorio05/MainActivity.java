@@ -115,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
 
                             getSupportActionBar().setTitle(menuItem.getTitle());
                         }
-
                         drawerLayout.closeDrawers();
 
                         return true;
@@ -172,7 +171,6 @@ public class MainActivity extends AppCompatActivity implements FragmentManager.O
                     .replace(R.id.contenido, fragment,tag)
                     .commit();
         }
-
 
         @Override
         public void obtenerCoordenadas() {
