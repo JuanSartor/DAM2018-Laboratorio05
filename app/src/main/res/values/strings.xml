@@ -7,18 +7,22 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="solicPermisoUbic">Se necesitarán permisos</string>
+    <string name="solicPermiso">Se necesitarán permisos</string>
     <string name="textoSolicPermUbic">Para poder ubicar la zona donde se encuentra actualmente y ayudar con la ubicación de nuevos reclamos es necesario acceder a su ubicación actual.</string>
-
+    <string name="solicPermGrabyEsc">Para poder generar un reclamo que NO sea del tipo VEREDAS o CALLE EN MAL ESTADO, se solicita como minimo dar una descripcion de al menos 8 caracteres o agregar una grabacion de sonido (si corresponde). Para poder realizar y guardar la grabacion se necesita tener permisos para acceder al almacenamiento del telefono y a continuacion se necesitan tambien permisos para utilizar el microfono del telefono.</string>
     <string name="ok">Ok</string>
     <string name="no">No</string>
     <string name="errorUbicacion">Error de ubicación, permisos insuficientes.</string>
+    <string name="errorGrabacion">Error de grabacion, permisos insuficientes.</string>
     <string name="avisoReabrirMapa">Por favor, vuelva a abrir el mapa para poder usar la ubicación.</string>
     <string name="seleccionCoord">Mantenga presionado en la ubicacion del reclamo.</string>
     <string name="btnBuscar">BUSCAR</string>
     <string name="tipoBusqueda">Buscar por tipo de reclamo</string>
     <string name="ceroReclamos">No existen reclamos (o reclamos de ese tipo).</string>
     <string name="btnTomarfoto">Tomar Foto</string>
+    <string name="btnGrabarAudio">Grabar Audio</string>
+    <string name="btnGrabarAudio2">Grabando...</string>
+    <string name="btnReproducirAudio">REPRODUCIENDO...</string>
     <string name="sacarFoto">Este tipo de reclamo debe tener una foto.</string>
     <string name="descripcionOSonido">Este tipo de reclamo requiere sonido o descripcion de +8 caracteres.</string>
 </resources>

@@ -17,6 +17,15 @@ public class Reclamo {
     private String reclamo;
     private String email;
     private String pathImagen;
+    private String pathAudio;
+
+    public String getPathAudio() {
+        return pathAudio;
+    }
+
+    public void setPathAudio(String pathAudio) {
+        this.pathAudio = pathAudio;
+    }
 
     public String getPathImagen() {
         return pathImagen;

@@ -72,7 +72,12 @@
                android:adjustViewBounds="true"
                android:scaleType="fitXY"
                android:src="@mipmap/ic_launcher_round" />
-
+           <Button
+               android:id="@+id/btnGrabarAudio"
+               android:layout_width="match_parent"
+               android:layout_height="wrap_content"
+               android:text="@string/btnGrabarAudio"
+               />
     <Button
         android:id="@+id/btnGuardar"
         android:layout_width="match_parent"
