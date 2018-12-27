@@ -65,11 +65,13 @@
         android:layout_height="wrap_content"
         android:text="@string/btnTomarfoto" />
 
-    <ImageView
-        android:id="@+id/foto"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@mipmap/ic_launcher_round" />
+           <ImageView
+               android:id="@+id/foto"
+               android:layout_width="wrap_content"
+               android:layout_height="wrap_content"
+               android:adjustViewBounds="true"
+               android:scaleType="fitXY"
+               android:src="@mipmap/ic_launcher_round" />
            <Button
                android:id="@+id/btnGrabarAudio"
                android:layout_width="match_parent"

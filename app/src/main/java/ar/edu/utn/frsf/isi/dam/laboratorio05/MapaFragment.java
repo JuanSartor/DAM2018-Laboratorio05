@@ -271,16 +271,23 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
 
         //Lo que empieza aca:
         LocationManager locationManagerCt = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-        Location locationCt = locationManagerCt.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-        LatLng latLng = new LatLng(locationCt.getLatitude(),
-                locationCt.getLongitude());
-
-        miMapa.setMyLocationEnabled(true);
-
-        miMapa.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        miMapa.animateCamera(CameraUpdateFactory.zoomTo(15));
+        Location location = null;
+        for (String provider : locationManagerCt.getProviders(true)) {
+            Location l = locationManagerCt.getLastKnownLocation(provider);
+            if (l == null)
+                continue;
+            if (location == null || l.getAccuracy() < location.getAccuracy())
+                location = l;
+        }
+        if (location!=null) {
+            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+            miMapa.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+            miMapa.animateCamera(CameraUpdateFactory.zoomTo(15));
+        }
         //y llega hasta aca, salvo el "setMyLocationEnabled" es para que mueva la camara
         // automaticamente al lugar donde uno esta ubicado
+
+        miMapa.setMyLocationEnabled(true);
     }
 
     @Override
