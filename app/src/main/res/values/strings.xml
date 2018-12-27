@@ -23,4 +23,6 @@
     <string name="btnGrabarAudio">Grabar Audio</string>
     <string name="btnGrabarAudio2">Grabando...</string>
     <string name="btnReproducirAudio">REPRODUCIENDO...</string>
+    <string name="sacarFoto">Este tipo de reclamo debe tener una foto.</string>
+    <string name="descripcionOSonido">Este tipo de reclamo requiere sonido o descripcion de +8 caracteres.</string>
 </resources>
