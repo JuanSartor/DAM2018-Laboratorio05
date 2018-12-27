@@ -2,12 +2,16 @@ package ar.edu.utn.frsf.isi.dam.laboratorio05;
 
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 
+import android.graphics.Color;
 import android.media.MediaRecorder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -29,6 +33,7 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import android.os.Environment;
@@ -65,10 +70,10 @@ public class NuevoReclamoFragment extends Fragment {
     private Button btnFoto;
     private OnNuevoLugarListener listener;
     private ImageView miniImagen;
-    private String pathFoto;
+    private String pathFoto=null;
     private Button btnGrabarAudio;
     private MediaRecorder mRecorder;
-    private String mFileName;
+    private String mFileName=null;
     private static final String LOG_TAG = "AudioRecordTest";
 
     private ArrayAdapter<Reclamo.TipoReclamo> tipoReclamoAdapter;
@@ -83,7 +88,6 @@ public class NuevoReclamoFragment extends Fragment {
         reclamoDao = MyDatabase.getInstance(this.getActivity()).getReclamoDao();
 
         View v = inflater.inflate(R.layout.fragment_nuevo_reclamo, container, false);
-        pathFoto=null;
         reclamoDesc = (EditText) v.findViewById(R.id.reclamo_desc);
         mail= (EditText) v.findViewById(R.id.reclamo_mail);
         tipoReclamo= (Spinner) v.findViewById(R.id.reclamo_tipo);
@@ -94,7 +98,7 @@ public class NuevoReclamoFragment extends Fragment {
         miniImagen= (ImageView) v.findViewById(R.id.foto);
         btnGrabarAudio=(Button) v.findViewById(R.id.btnGrabarAudio);
 
-
+        miniImagen.setImageBitmap(null);
 
         tipoReclamoAdapter = new ArrayAdapter<Reclamo.TipoReclamo>(getActivity(),android.R.layout.simple_spinner_item,Reclamo.TipoReclamo.values());
         tipoReclamoAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -135,12 +139,9 @@ public class NuevoReclamoFragment extends Fragment {
         btnGrabarAudio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 grabarAudio();
             }
         });
-
-
         return v;
     }
 
@@ -187,10 +188,10 @@ public class NuevoReclamoFragment extends Fragment {
             reclamoActual.setLatitud(Double.valueOf(coordenadas[0]));
             reclamoActual.setLongitud(Double.valueOf(coordenadas[1]));
         }
-        if(pathFoto==null){
+        if(pathFoto!=null)
             reclamoActual.setPathImagen(pathFoto);
-        }
-        reclamoActual.setPathAudio(mFileName);
+        if(mFileName!=null)
+            reclamoActual.setPathAudio(mFileName);
         Runnable hiloActualizacion = new Runnable() {
             @Override
             public void run() {
@@ -220,7 +221,6 @@ public class NuevoReclamoFragment extends Fragment {
         if(i1.resolveActivity(getActivity().getPackageManager())!=null){
             File foto_file= null;
             try{
-
                 foto_file= crearImagenFile();
             }
             catch (IOException e){
@@ -234,9 +234,7 @@ public class NuevoReclamoFragment extends Fragment {
                         foto_file);
                 i1.putExtra(MediaStore.EXTRA_OUTPUT, foto_URI);
             startActivityForResult(i1, REQUEST_IMAGE_SAVE);
-            reclamoActual.setPathImagen(pathFoto);
             }
-
         }
     }
 
@@ -252,11 +250,7 @@ public class NuevoReclamoFragment extends Fragment {
         );
         pathFoto = image.getAbsolutePath();
         return image;
-
     }
-
-
-
 
    public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
@@ -276,46 +270,97 @@ public class NuevoReclamoFragment extends Fragment {
            if (imageBitmap != null) {
                miniImagen.setImageBitmap(imageBitmap);
            }
-
        }
-
     }
-
 
     public void grabarAudio(){
 
-        if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.RECORD_AUDIO}, 1000);
-        }
-
-
-        if(mRecorder==null){
-            mFileName = Environment.getExternalStorageDirectory()
-                    .getAbsolutePath()+"/audiorecordtest.3gp";
-
-            mRecorder = new MediaRecorder();
-            mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-            mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-            mRecorder.setOutputFile(mFileName);
-            try {
-                mRecorder.prepare();
-                mRecorder.start();
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "prepare() failed");
+        if(mRecorder==null) {
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
+                if((ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    !=PackageManager.PERMISSION_GRANTED
+                    || ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.RECORD_AUDIO)
+                    !=PackageManager.PERMISSION_GRANTED)){
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity()
+                            , Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            || ActivityCompat.shouldShowRequestPermissionRationale(getActivity()
+                            , Manifest.permission.RECORD_AUDIO))
+                        (new AlertDialog.Builder(getContext()))
+                            .setTitle(getString(R.string.solicPermiso)).setMessage(getString(R.string.solicPermGrabyEsc))
+                            .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                            , Manifest.permission.RECORD_AUDIO}, 1000);
+                                    return;}})
+                            .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    Toast.makeText(getActivity(), getString(R.string.errorGrabacion)
+                                            , Toast.LENGTH_LONG).show();}})
+                            .create()
+                            .show();
+                    else
+                        requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE
+                                , Manifest.permission.RECORD_AUDIO}, 1000);
+                return;
+                }
+                if((ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                        ==PackageManager.PERMISSION_GRANTED
+                        && ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.RECORD_AUDIO)
+                        ==PackageManager.PERMISSION_GRANTED)){
+                    iniciarGrabacion();
+                }
             }
-
         }
         else if(mRecorder!=null){
+            //para detener la grabacion...
             mRecorder.stop();
             mRecorder.release();
             mRecorder=null;
+            btnGrabarAudio.setText(getString(R.string.btnGrabarAudio));
+            btnGrabarAudio.setTextColor(Color.BLACK);
             Toast.makeText(getActivity(),"Grabacion finalizada",Toast.LENGTH_SHORT).show();
-
-
         }
-
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
+        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
+                if(grantResults.length>0&& grantResults[0] == PackageManager.PERMISSION_GRANTED
+                        && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                    iniciarGrabacion();
+                }else
+                    Toast.makeText(getActivity(), getString(R.string.errorGrabacion), Toast.LENGTH_LONG).show();
+        }
 
+    public void iniciarGrabacion (){
+        //para diferenciar grabaciones se les agrega fecha y hora al nombre de archivo
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                btnGrabarAudio.setText(getString(R.string.btnGrabarAudio2));
+                btnGrabarAudio.setTextColor(Color.RED);
+            }
+        });
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-mm-dd-hh-mm-ss");
+        Date date = new Date();
+        String strDate = dateFormat.format(date);
+
+        mFileName = Environment.getExternalStorageDirectory()
+                .getAbsolutePath()+"/audioreclamo-"+strDate+".3gp";
+
+        mRecorder = new MediaRecorder();
+        mRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+        mRecorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+        mRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+        mRecorder.setOutputFile(mFileName);
+        try {
+            mRecorder.prepare();
+            mRecorder.start();
+        } catch (IOException e) {
+            Log.e(LOG_TAG, "prepare() failed");
+        }
+    }
 }

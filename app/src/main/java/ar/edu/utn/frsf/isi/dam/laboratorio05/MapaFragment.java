@@ -251,22 +251,24 @@ public class MapaFragment extends SupportMapFragment implements OnMapReadyCallba
                 && ActivityCompat.checkSelfPermission(getContext(),Manifest.permission.ACCESS_COARSE_LOCATION)
                 !=PackageManager.PERMISSION_GRANTED)){
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity()
-                    , Manifest.permission.ACCESS_FINE_LOCATION))
+                    , Manifest.permission.ACCESS_FINE_LOCATION)
+                    || ActivityCompat.shouldShowRequestPermissionRationale(getActivity()
+                            , Manifest.permission.ACCESS_COARSE_LOCATION))
                 (new AlertDialog.Builder(getContext()))
-                        .setTitle(getString(R.string.solicPermisoUbic)).setMessage(getString(R.string.textoSolicPermUbic))
+                        .setTitle(getString(R.string.solicPermiso)).setMessage(getString(R.string.textoSolicPermUbic))
                         .setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(getActivity(), perm, 5);
-                                return;}
-                        })
+                                requestPermissions(perm, 5);
+                                return;}})
                         .setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                Toast.makeText(getContext(), getString(R.string.errorUbicacion), Toast.LENGTH_LONG).show();}
-                        }).create().show();
+                                Toast.makeText(getContext(), getString(R.string.errorUbicacion), Toast.LENGTH_LONG).show();}})
+                        .create()
+                        .show();
             else
-                ActivityCompat.requestPermissions(getActivity(),perm,5);
+                requestPermissions(perm,5);
             return;}
 
         //Lo que empieza aca:

@@ -1,4 +1,5 @@
 package ar.edu.utn.frsf.isi.dam.laboratorio05;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -8,6 +9,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -31,6 +33,10 @@ public class ListaReclamosFragment extends Fragment {
     private ListView lvReclamos;
     private ReclamoDao reclamoDao;
     private static final String LOG_TAG = "AudioRecordTest";
+    private MediaPlayer mPlayer = new MediaPlayer();
+    private int idReproduciendo=-1;
+    private boolean reproduciendo=false;
+
     public ListaReclamosFragment() {
         // Required empty public constructor
     }
@@ -98,20 +104,59 @@ public class ListaReclamosFragment extends Fragment {
         }
 
         public void reproducirAudio(int id){
+            final int reclamoAReproducir=id;
 
-             MediaPlayer mPlayer = new MediaPlayer();
-            try {
-                mPlayer.setDataSource(reclamoDao.getById(id).getPathAudio());
-                mPlayer.prepare();
+            //se usa booleano reproduciendo porque si uso metodo isPlaying de mPlayer en if
+            // y no esta reproduciendo da excepcion si no esta inicializado aun.
 
-            } catch (IOException e) {
-                Log.e(LOG_TAG, "prepare() failed");
+            if (reproduciendo && reclamoAReproducir == idReproduciendo){
+                mPlayer.stop();
+                mPlayer.release();
+                idReproduciendo=-1;
+                reproduciendo=false;
+                ArrayList<View> listaViews = new ArrayList<>();
+                lvReclamos.findViewsWithText(listaViews, getContext().getString(R.string.btnReproducirAudio),
+                        View.FIND_VIEWS_WITH_TEXT);
+                if(listaViews.size()>0) {
+                    ((Button) listaViews.get(0)).setText("Reproducir Audio");
+                    ((Button) listaViews.get(0)).setTextColor(Color.BLACK);
+                }
             }
-            mPlayer.start();
-            Toast.makeText(getActivity(),"Reproduciendo Audio",Toast.LENGTH_SHORT).show();
+            else{
+                if (reproduciendo)
+                    mPlayer.stop();
+                mPlayer=new MediaPlayer();
 
+                mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mp) {
+                        reproduciendo=false;
+                        idReproduciendo=-1;
+                        ArrayList<View> listaViews = new ArrayList<>();
+                        lvReclamos.findViewsWithText(listaViews, getString(R.string.btnReproducirAudio),
+                                View.FIND_VIEWS_WITH_TEXT);
+                        if(listaViews.size()>0) {
+                            ((Button) listaViews.get(0)).setText("Reproducir Audio");
+                            ((Button) listaViews.get(0)).setTextColor(Color.BLACK);
+                        }
+                    }});
 
-
+                Runnable codigoRepr= new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            mPlayer.setDataSource(reclamoDao.getById(reclamoAReproducir).getPathAudio());
+                            mPlayer.prepare();
+                        } catch (IOException e) {
+                            Log.e(LOG_TAG, "prepare() failed");
+                        }
+                        mPlayer.start();
+                        reproduciendo=true;
+                        idReproduciendo=reclamoAReproducir;
+                    }};
+                Thread hiloReproduccion = new Thread(codigoRepr);
+                hiloReproduccion.start();
+            }
         }
     };
 
