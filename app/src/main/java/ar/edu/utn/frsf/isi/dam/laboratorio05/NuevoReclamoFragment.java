@@ -182,12 +182,14 @@ public class NuevoReclamoFragment extends Fragment {
                 sacarGuardarFoto();
             }
         });
+      
         btnGrabarAudio.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 grabarAudio();
             }
         });
+      
         return v;
     }
 
@@ -203,10 +205,12 @@ public class NuevoReclamoFragment extends Fragment {
                             mail.setText(reclamoActual.getEmail());
                             tvCoord.setText(reclamoActual.getLatitud()+";"+reclamoActual.getLongitud());
                             reclamoDesc.setText(reclamoActual.getReclamo());
+                          
                             if (reclamoActual.getPathImagen()!=null)
                                 miniImagen.setImageURI(Uri.parse(reclamoActual.getPathImagen()));
                             else
                                 miniImagen.setImageBitmap(null);
+                          
                             Reclamo.TipoReclamo[] tipos= Reclamo.TipoReclamo.values();
                             for(int i=0;i<tipos.length;i++) {
                                 if(tipos[i].equals(reclamoActual.getTipo())) {
@@ -240,7 +244,7 @@ public class NuevoReclamoFragment extends Fragment {
 
         reclamoActual.setPathImagen(pathFoto);
         reclamoActual.setPathAudio(pathAudio);
-      
+
         Runnable hiloActualizacion = new Runnable() {
             @Override
             public void run() {
@@ -278,7 +282,6 @@ public class NuevoReclamoFragment extends Fragment {
                 e.printStackTrace(); }
 
             if(foto_file!=null){
-//aca
                 Uri foto_URI = FileProvider.getUriForFile(getActivity().getApplication(),
                         "com.example.android.fileprovider",
                         foto_file);
